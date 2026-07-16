@@ -16,29 +16,7 @@ jobs:
           submodules: 'recursive'
           fetch-depth: '0'
 
-      - name: Initialize Submodules
-        run: |
-          git config --global user.email "k25782176@gmail.com"
-          git config --global user.name "maksim15777"
-          python3 -c "
-          import subprocess
-          path = None
-          url = None
-          with open('.gitmodules') as f:
-              for line in f:
-                  line = line.strip()
-                  if line.startswith('path =') or line.startswith('path='):
-                      path = line.split('=', 1)[1].strip()
-                  elif line.startswith('url =') or line.startswith('url='):
-                      url = line.split('=', 1)[1].strip()
-                      if path and url:
-                          print(f'Adding submodule: {path} from {url}')
-                          subprocess.run(f'rm -rf {path}', shell=True)
-                          subprocess.run(f'git submodule add --force {url} {path}', shell=True)
-                          path = None
-                          url = None
-          "
-          git submodule update --init --recursive
+
 
       - name: Create canonical source directory
         run: |

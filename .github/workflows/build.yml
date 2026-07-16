@@ -16,10 +16,7 @@ jobs:
           submodules: 'recursive'
           fetch-depth: '0'
 
-      - name: Set active Xcode path
-        run: |
-          XCODE_VERSION=$(cat versions.json | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["xcode"]);')
-          sudo xcode-select -s /Applications/Xcode_$XCODE_VERSION.app/Contents/Developer
+      # Xcode selection removed to use default runner version
 
       - name: Create canonical source directory
         run: |
@@ -52,6 +49,8 @@ jobs:
           python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning/certs
           python3 -u build-system/Make/Make.py \
             --bazelUserRoot="$BAZEL_USER_ROOT" \
+            --overrideXcodeVersion \
+            --overrideBazelVersion \
             build \
             --configurationPath="build-system/appstore-configuration.json" \
             --codesigningInformationPath=build-system/fake-codesigning \

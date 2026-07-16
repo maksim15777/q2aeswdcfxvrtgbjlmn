@@ -25,10 +25,6 @@ jobs:
           cp -R $GITHUB_WORKSPACE /Users/Shared/
           mv /Users/Shared/$(basename $GITHUB_WORKSPACE) /Users/Shared/telegram-ios
 
-      - name: Install dependencies
-        run: |
-          brew install pkg-config
-
       - name: Build the App
         run: |
           set -x

@@ -80,9 +80,6 @@ jobs:
           zip -r "./$OUTPUT_PATH/Telegram.DSYMs.zip" build/DSYMs 1>/dev/null
 
           # --- Patch IPA bundle ID for side-by-side sideloading ---
-          # Build uses ph.telegra.Telegraph so Bazel codesigning passes,
-          # then we patch CFBundleIdentifier + App Groups so Sideloadly installs it
-          # as a separate app alongside the AppStore Telegram without a black screen.
           IPA_PATH="$OUTPUT_PATH/Telegram.ipa"
           OLD_ID="ph.telegra.Telegraph"
           NEW_ID="ph.telegra.TelegraphCopy"
@@ -93,26 +90,20 @@ jobs:
             unzip -q Telegram_orig.ipa -d Telegram_extracted
             APP_DIR=$(find Telegram_extracted/Payload -maxdepth 1 -name "*.app" | head -1)
 
-            # 1. Patch Info.plist bundle identifier and display name
+            # 1. Patch ONLY main app Info.plist (NOT framework Info.plists — they'd break)
             INFOPLIST="$APP_DIR/Info.plist"
             if [ -f "$INFOPLIST" ]; then
               plutil -replace CFBundleIdentifier -string "$NEW_ID" "$INFOPLIST"
               plutil -replace CFBundleDisplayName -string "Telegram★" "$INFOPLIST"
-              echo "Patched Info.plist: CFBundleIdentifier → $NEW_ID"
+              echo "Patched Info.plist: $OLD_ID → $NEW_ID"
             fi
 
-            # 2. Patch embedded.mobileprovision – replace all occurrences of old ID with new ID
-            #    (plain text substitution inside the binary CMS blob is sufficient for sideloading tools)
+            # 2. Patch embedded.mobileprovision (App Groups, keychain groups etc.)
             PROV="$APP_DIR/embedded.mobileprovision"
             if [ -f "$PROV" ]; then
               sed -i '' "s/${OLD_ID}/${NEW_ID}/g" "$PROV" 2>/dev/null || true
               echo "Patched embedded.mobileprovision"
             fi
-
-            # 3. Patch all nested Info.plist files (extensions etc.) if present
-            find "$APP_DIR" -name "Info.plist" | while read plist; do
-              /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $(PlistBuddy -c 'Print :CFBundleIdentifier' $plist 2>/dev/null | sed s/${OLD_ID}/${NEW_ID}/g)" "$plist" 2>/dev/null || true
-            done
 
             cd Telegram_extracted
             zip -qr /tmp/ipa_patch/Telegram_patched.ipa Payload
@@ -120,7 +111,7 @@ jobs:
             chmod 755 "$OUTPUT_PATH"
             rm -f "$OUTPUT_PATH/Telegram.ipa"
             cp /tmp/ipa_patch/Telegram_patched.ipa "$OUTPUT_PATH/Telegram.ipa"
-            echo "IPA patched and replaced successfully"
+            echo "IPA patched successfully"
           fi
 
       - name: Create Release and Upload Assets

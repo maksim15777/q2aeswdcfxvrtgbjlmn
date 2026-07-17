@@ -119,5 +119,6 @@ jobs:
           gh release create "$TAG" \
             --title "$TITLE" \
             --notes "$NOTES" \
+            --clobber \
             "$SOURCE_DIR/build/artifacts/Telegram.ipa#Telegram.ipa" \
             "$SOURCE_DIR/build/artifacts/Telegram.DSYMs.zip#Telegram.DSYMs.zip"

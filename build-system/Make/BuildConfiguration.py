@@ -192,15 +192,6 @@ def copy_profiles_from_directory(source_path, destination_path, team_id, bundle_
                 else:
                     print('Warning: skipping provisioning profile at {} with bundle_id {} (base_name {})'.format(file_path, profile_name, profile_base_name))
 
-    # Fallback: if bundle_id doesn't match any profile (e.g. custom bundle_id like TelegraphCopy),
-    # copy all profiles by their filename so the build can proceed with fake-codesigning.
-    if not copied_any:
-        print('Warning: no provisioning profiles matched bundle_id {}, copying all profiles as fallback'.format(bundle_id))
-        for file_name in os.listdir(source_path):
-            file_path = source_path + '/' + file_name
-            if os.path.isfile(file_path) and file_path.endswith('.mobileprovision'):
-                shutil.copyfile(file_path, destination_path + '/' + file_name)
-
 
 def resolve_aps_environment_from_directory(source_path, team_id, bundle_id):
     for file_name in os.listdir(source_path):
@@ -229,19 +220,6 @@ def resolve_aps_environment_from_directory(source_path, team_id, bundle_id):
                         print('Provisioning profile at {} does not include an aps-environment entitlement'.format(file_path))
                         return None
                     return profile_dict['Entitlements']['aps-environment']
-
-    # Fallback: bundle_id doesn't match any profile (custom bundle_id).
-    # Try to find aps-environment from any Telegram.mobileprovision present.
-    for file_name in os.listdir(source_path):
-        file_path = source_path + '/' + file_name
-        if os.path.isfile(file_path) and file_name == 'Telegram.mobileprovision':
-            profile_data = run_executable_with_output('openssl', arguments=[
-                'smime', '-inform', 'der', '-verify', '-noverify', '-in', file_path
-            ], decode=False, stderr_to_stdout=False, check_result=True)
-            profile_dict = plistlib.loads(profile_data)
-            if 'aps-environment' in profile_dict['Entitlements']:
-                print('Warning: using aps-environment from Telegram.mobileprovision as fallback for bundle_id {}'.format(bundle_id))
-                return profile_dict['Entitlements']['aps-environment']
 
     return None
 

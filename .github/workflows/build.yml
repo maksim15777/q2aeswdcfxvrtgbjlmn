@@ -99,6 +99,9 @@ jobs:
             cd Telegram_extracted
             zip -qr /tmp/ipa_patch/Telegram_patched.ipa Payload
             cd $SOURCE_DIR
+            # Ensure proper permissions and remove old file before copying
+            chmod 755 "$OUTPUT_PATH"
+            rm -f "$OUTPUT_PATH/Telegram.ipa"
             cp /tmp/ipa_patch/Telegram_patched.ipa "$OUTPUT_PATH/Telegram.ipa"
             echo "IPA patched and replaced successfully"
           fi

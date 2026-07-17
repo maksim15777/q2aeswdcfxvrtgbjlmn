@@ -116,9 +116,12 @@ jobs:
           TITLE="Telegram ${{ env.APP_VERSION }} (${{ env.BUILD_NUMBER }})"
           NOTES="An unsigned build of Telegram for iOS ${{ env.APP_VERSION }} (${{ env.BUILD_NUMBER }})"
 
+          # Delete existing release/tag if present (--clobber not supported on this runner)
+          gh release delete "$TAG" --yes 2>/dev/null || true
+          git push origin --delete "$TAG" 2>/dev/null || true
+
           gh release create "$TAG" \
             --title "$TITLE" \
             --notes "$NOTES" \
-            --clobber \
             "$SOURCE_DIR/build/artifacts/Telegram.ipa#Telegram.ipa" \
             "$SOURCE_DIR/build/artifacts/Telegram.DSYMs.zip#Telegram.DSYMs.zip"

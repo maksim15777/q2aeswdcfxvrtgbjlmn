@@ -59,48 +59,37 @@ jobs:
             --configuration=release_arm64 \
             --buildNumber="$BUILD_NUMBER"
 
-          # collect ipa
+          # collect ipa — try bazel-bin symlink first, fall back to bazel-out glob
           OUTPUT_PATH="build/artifacts"
           rm -rf "$OUTPUT_PATH"
           mkdir -p "$OUTPUT_PATH"
-          cp bazel-bin/Telegram/Telegram.ipa $OUTPUT_PATH/
+          if [ -f bazel-bin/Telegram/Telegram.ipa ]; then
+            cp bazel-bin/Telegram/Telegram.ipa "$OUTPUT_PATH/"
+          else
+            find bazel-out -name "Telegram.ipa" -exec cp {} "$OUTPUT_PATH/" \; -quit
+          fi
 
           # collect dsym
           mkdir -p build/DSYMs
-          cp -R bazel-bin/Telegram/*.dSYM build/DSYMs/
+          if ls bazel-bin/Telegram/*.dSYM 2>/dev/null; then
+            cp -R bazel-bin/Telegram/*.dSYM build/DSYMs/
+          else
+            find bazel-out -name "*.dSYM" -exec cp -R {} build/DSYMs/ \;
+          fi
           zip -r "./$OUTPUT_PATH/Telegram.DSYMs.zip" build/DSYMs 1>/dev/null
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Create Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: build-${{ env.BUILD_NUMBER }}
-          release_name: Telegram ${{ env.APP_VERSION }} (${{ env.BUILD_NUMBER }})
-          body: |
-            An unsigned build of Telegram for iOS ${{ env.APP_VERSION }} (${{ env.BUILD_NUMBER }})
-          draft: false
-          prerelease: false
+        run: |
+          SOURCE_DIR=/Users/Shared/telegram-ios
+          cd $SOURCE_DIR
+          TAG="build-${{ env.BUILD_NUMBER }}"
+          TITLE="Telegram ${{ env.APP_VERSION }} (${{ env.BUILD_NUMBER }})"
+          NOTES="An unsigned build of Telegram for iOS ${{ env.APP_VERSION }} (${{ env.BUILD_NUMBER }})"
 
-      - name: Upload Release IPA
-        id: upload-release-ipa 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /Users/Shared/telegram-ios/build/artifacts/Telegram.ipa
-          asset_name: Telegram.ipa
-          asset_content_type: application/zip
-
-      - name: Upload Release DSYM
-        id: upload-release-dsym 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /Users/Shared/telegram-ios/build/artifacts/Telegram.DSYMs.zip
-          asset_name: Telegram.DSYMs.zip
-          asset_content_type: application/zip
+          gh release create "$TAG" \
+            --title "$TITLE" \
+            --notes "$NOTES" \
+            "$SOURCE_DIR/build/artifacts/Telegram.ipa#Telegram.ipa" \
+            "$SOURCE_DIR/build/artifacts/Telegram.DSYMs.zip#Telegram.DSYMs.zip"

@@ -1,116 +1,99 @@
-# Telegram iOS Source Code Compilation Guide
+<div align="center">
+    <img src="https://github.com/levochkaa/BetterTG/blob/main/BetterTG/Assets.xcassets/AppIcon_README.imageset/bettertg256.png?raw=true" alt="AppIcon">
+</div>
+<h1 align="center">BetterTG</h1>
+<p align="center">A Telegram client for iOS</p>
 
-We welcome all developers to use our API and source code to create applications on our platform.
-There are several things we require from **all developers** for the moment.
+![](https://img.shields.io/badge/platform-iOS-000000?style=flat&logo=apple&logoColor=white)
+![](https://img.shields.io/badge/minimum%20OS-iOS%2016-blueviolet?style=flat&logo=apple&logoColor=white)
+![](https://img.shields.io/badge/Swift%205.7-FA7343?style=flat&logo=swift&logoColor=white)
+![](https://img.shields.io/badge/SwiftUI-2E00F1?style=flat&logo=swift&logoColor=white)
+![](https://img.shields.io/badge/Telegram-2CA5E0?style=flat&logo=telegram&logoColor=white)
+[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg?style=flat)](https://opensource.org/licenses/)
 
-# Creating your Telegram Application
+# Currently implemented
 
-1. [**Obtain your own api_id**](https://core.telegram.org/api/obtaining_api_id) for your application.
-2. Please **do not** use the name Telegram for your app — or make sure your users understand that it is unofficial.
-3. Kindly **do not** use our standard logo (white paper plane in a blue circle) as your app's logo.
-3. Please study our [**security guidelines**](https://core.telegram.org/mtproto/security_guidelines) and take good care of your users' data and privacy.
-4. Please remember to publish **your** code too in order to comply with the licences.
+- login
+- all chats with people from main folder/archive
+- sending/reading text/photo/voice/album messages
+- replying to/editing messages
+- draft, forwarded from
+- animojis (tgs, webp, sometimes webm)
+- pinned chats
+- searching your/global chats
+- custom settings sheet
+- unique UI
+- last seen online
+- formatting/formatted messages
+- live activity with opened chat
 
-# Quick Compilation Guide
+# Road Map
 
-## Get the Code
+[GitHub Project](https://github.com/users/levochkaa/projects/1/views/1)
 
-```
-git clone --recursive -j8 https://github.com/TelegramMessenger/Telegram-iOS.git
-```
+# Installation
 
-## Setup Xcode
+Download an .ipa file from [releases tab](https://github.com/levochkaa/BetterTG/releases/latest) and install through [Sideloadly](https://altstore.io)
+or [AltStore (suggested)](https://altstore.io).
 
-Install Xcode (directly from https://developer.apple.com/download/applications or using the App Store).
+**Soon, I will buy Paid Apple Developer account, I promise.**
 
-## Adjust Configuration
+# Screenshots
 
-1. Generate a random identifier:
-```
-openssl rand -hex 8
-```
-2. Create a new Xcode project. Use `Telegram` as the Product Name. Use `org.{identifier from step 1}` as the Organization Identifier.
-3. Open `Keychain Access` and navigate to `Certificates`. Locate `Apple Development: your@email.address (XXXXXXXXXX)` and double tap the certificate. Under `Details`, locate `Organizational Unit`. This is the Team ID.
-4. Edit `build-system/template_minimal_development_configuration.json`. Use data from the previous steps.
+<span><img src=".github/images/screenshots/1.png" alt="screenshots/1" width="270px"></span>
+<span><img src=".github/images/screenshots/2.png" alt="screenshots/2" width="270px"></span>
+<span><img src=".github/images/screenshots/3.png" alt="screenshots/3" width="270px"></span>
+<span><img src=".github/images/screenshots/4.png" alt="screenshots/4" width="270px"></span>
+<span><img src=".github/images/screenshots/5.png" alt="screenshots/5" width="270px"></span>
+<span><img src=".github/images/screenshots/6.png" alt="screenshots/6" width="270px"></span>
+<span><img src=".github/images/screenshots/7.png" alt="screenshots/7" width="270px"></span>
+<span><img src=".github/images/screenshots/8.png" alt="screenshots/8" width="270px"></span>
+<span><img src=".github/images/screenshots/9.png" alt="screenshots/9" width="270px"></span>
+<span><img src=".github/images/screenshots/10.png" alt="screenshots/10" width="270px"></span>
+<span><img src=".github/images/screenshots/11.png" alt="screenshots/11" width="270px"></span>
+<span><img src=".github/images/screenshots/12.png" alt="screenshots/12" width="270px"></span>
+<span><img src=".github/images/screenshots/13.png" alt="screenshots/13" width="270px"></span>
+<span><img src=".github/images/screenshots/14.png" alt="screenshots/14" width="270px"></span>
+<span><img src=".github/images/screenshots/15.png" alt="screenshots/15" width="270px"></span>
+<span><img src=".github/images/screenshots/16.png" alt="screenshots/16" width="270px"></span>
+<span><img src=".github/images/screenshots/17.png" alt="screenshots/17" width="270px"></span>
+<span><img src=".github/images/screenshots/18.png" alt="screenshots/18" width="270px"></span>
 
-## Generate an Xcode project
+# Contributing
 
-```
-python3 build-system/Make/Make.py \
-    --cacheDir="$HOME/telegram-bazel-cache" \
-    generateProject \
-    --configurationPath=build-system/template_minimal_development_configuration.json \
-    --xcodeManagedCodesigning
-```
+You can contribute **any** change you want to!
 
-# Advanced Compilation Guide
+**But, if you are intreseted in the project Road Map, check this [GitHub Project](https://github.com/users/levochkaa/projects/1/views/1)**
 
-## Xcode
+## Step 1 - Clone the repo
 
-1. Copy and edit `build-system/appstore-configuration.json`.
-2. Copy `build-system/fake-codesigning`. Create and download provisioning profiles, using the `profiles` folder as a reference for the entitlements.
-3. Generate an Xcode project:
-```
-python3 build-system/Make/Make.py \
-    --cacheDir="$HOME/telegram-bazel-cache" \
-    generateProject \
-    --configurationPath=configuration_from_step_1.json \
-    --codesigningInformationPath=directory_from_step_2
-```
-
-## IPA
-
-1. Repeat the steps from the previous section. Use distribution provisioning profiles.
-2. Run:
-```
-python3 build-system/Make/Make.py \
-    --cacheDir="$HOME/telegram-bazel-cache" \
-    build \
-    --configurationPath=...see previous section... \
-    --codesigningInformationPath=...see previous section... \
-    --buildNumber=100001 \
-    --configuration=release_arm64
-```
-
-# FAQ
-
-## Xcode is stuck at "build-request.json not updated yet"
-
-Occasionally, you might observe the following message in your build log:
-```
-"/Users/xxx/Library/Developer/Xcode/DerivedData/Telegram-xxx/Build/Intermediates.noindex/XCBuildData/xxx.xcbuilddata/build-request.json" not updated yet, waiting...
+```shell
+git clone https://github.com/levochkaa/BetterTG.git
 ```
 
-Should this occur, simply cancel the ongoing build and initiate a new one.
+## Step 2 - Download XCode
 
-## Telegram_xcodeproj: no such package 
+Latest **Xcode 14 beta** versions are used for this project.\
+I suggest using [**Xcodes**](https://github.com/RobotsAndPencils/XcodesApp) for downloading XCode.
 
-Following a system restart, the auto-generated Xcode project might encounter a build failure accompanied by this error:
+## Step 3 - `api_id` and `api_hash`
+
+Go to [this site](https://my.telegram.org/).\
+Log in, open **API development tools**, fill up the info.\
+Then click **Save changes**
+at the bottom of the page. \
+Leave the page **open** for the next step.
+
+## Step 4 - Development environment
+
+You need to have [Homebrew](https://brew.sh) installed. \
+Now run these commands:
+
+```shell
+brew install swift-sh
+sudo chmod +x environment.swift
+sudo chmod +x gyb.sh
+./environment.swift <api_id> <api_hash>
 ```
-ERROR: Skipping '@rules_xcodeproj_generated//generator/Telegram/Telegram_xcodeproj:Telegram_xcodeproj': no such package '@rules_xcodeproj_generated//generator/Telegram/Telegram_xcodeproj': BUILD file not found in directory 'generator/Telegram/Telegram_xcodeproj' of external repository @rules_xcodeproj_generated. Add a BUILD file to a directory to mark it as a package.
-```
 
-If you encounter this issue, re-run the project generation steps in the README.
-
-
-# Tips
-
-## Codesigning is not required for simulator-only builds
-
-Add `--disableProvisioningProfiles`:
-```
-python3 build-system/Make/Make.py \
-    --cacheDir="$HOME/telegram-bazel-cache" \
-    generateProject \
-    --configurationPath=path-to-configuration.json \
-    --codesigningInformationPath=path-to-provisioning-data \
-    --disableProvisioningProfiles
-```
-
-## Versions
-
-Each release is built using a specific Xcode version (see `versions.json`). The helper script checks the versions of the installed software and reports an error if they don't match the ones specified in `versions.json`. It is possible to bypass these checks:
-
-```
-python3 build-system/Make/Make.py --overrideXcodeVersion build ... # Don't check the version of Xcode
-```
+Everything is set up now! **GL HF**

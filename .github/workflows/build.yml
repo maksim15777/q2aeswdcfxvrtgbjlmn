@@ -3,133 +3,70 @@ name: CI
 on:
   push:
     branches: [ master, main ]
-
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-14
     permissions:
       contents: write
 
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: 'recursive'
           fetch-depth: '0'
 
-
-
-      - name: Create canonical source directory
+      - name: Install dependencies
         run: |
-          set -x
-          sudo mkdir -p /Users/Shared
-          cp -R $GITHUB_WORKSPACE /Users/Shared/
-          mv /Users/Shared/$(basename $GITHUB_WORKSPACE) /Users/Shared/telegram-ios
+          brew install swiftlint gyb swiftgen
 
-      - name: Build the App
+      - name: Generate Swift Files with GYB
         run: |
-          set -x
+          chmod +x gyb.sh
+          ./gyb.sh 35773088 a22ec995c0cdd77cfbb03ca58bbd1723
 
-          # source code paths are included in the final binary, so we need to make them stable across builds
-          SOURCE_DIR=/Users/Shared/telegram-ios
+      - name: Resolve Package Dependencies
+        run: |
+          xcodebuild -resolvePackageDependencies -project BetterTG.xcodeproj
 
-          # use canonical bazel root
-          BAZEL_USER_ROOT="/private/var/tmp/_bazel_containerhost"
+      - name: Build and Archive
+        run: |
+          xcodebuild archive \
+            -project BetterTG.xcodeproj \
+            -scheme BetterTG \
+            -archivePath build/BetterTG.xcarchive \
+            -sdk iphoneos \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PRODUCT_BUNDLE_IDENTIFIER="ph.telegra.TelegraphCopy"
 
-          cd $SOURCE_DIR
+      - name: Package IPA
+        run: |
+          mkdir -p build/Payload
+          cp -R build/BetterTG.xcarchive/Products/Applications/BetterTG.app build/Payload/
+          cd build
+          zip -r Telegram.ipa Payload
+          echo "IPA packaged successfully"
 
-          BUILD_NUMBER_OFFSET="$(cat build_number_offset)"
-
-          export APP_VERSION=$(cat versions.json | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["app"]);')
-          export COMMIT_COUNT=$(git rev-list --count HEAD)
-          export COMMIT_COUNT="$(($COMMIT_COUNT+$BUILD_NUMBER_OFFSET))"
-          export BUILD_NUMBER="$COMMIT_COUNT"
-          echo "BUILD_NUMBER=$(echo $BUILD_NUMBER)" >> $GITHUB_ENV
-          echo "APP_VERSION=$(echo $APP_VERSION)" >> $GITHUB_ENV
-
-          python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning/certs
-          python3 -u build-system/Make/Make.py \
-            --bazelUserRoot="$BAZEL_USER_ROOT" \
-            --overrideXcodeVersion \
-            --overrideBazelVersion \
-            build \
-            --configurationPath="build-system/appstore-configuration.json" \
-            --codesigningInformationPath=build-system/fake-codesigning \
-            --configuration=release_arm64 \
-            --buildNumber="$BUILD_NUMBER" \
-            --disableExtensions
-
-          # collect ipa — try bazel-bin symlink first, fall back to bazel-out glob
-          OUTPUT_PATH="build/artifacts"
-          rm -rf "$OUTPUT_PATH"
-          mkdir -p "$OUTPUT_PATH"
-          if [ -f bazel-bin/Telegram/Telegram.ipa ]; then
-            cp bazel-bin/Telegram/Telegram.ipa "$OUTPUT_PATH/"
-          else
-            find bazel-out -name "Telegram.ipa" -exec cp {} "$OUTPUT_PATH/" \; -quit
-          fi
-
-          # collect dsym
-          mkdir -p build/DSYMs
-          if ls bazel-bin/Telegram/*.dSYM 2>/dev/null; then
-            cp -R bazel-bin/Telegram/*.dSYM build/DSYMs/
-          else
-            find bazel-out -name "*.dSYM" -exec cp -R {} build/DSYMs/ \;
-          fi
-          zip -r "./$OUTPUT_PATH/Telegram.DSYMs.zip" build/DSYMs 1>/dev/null
-
-          # --- Patch IPA bundle ID for side-by-side sideloading ---
-          IPA_PATH="$OUTPUT_PATH/Telegram.ipa"
-          OLD_ID="ph.telegra.Telegraph"
-          NEW_ID="ph.telegra.TelegraphCopy"
-          if [ -f "$IPA_PATH" ]; then
-            mkdir -p /tmp/ipa_patch
-            cp "$IPA_PATH" /tmp/ipa_patch/Telegram_orig.ipa
-            cd /tmp/ipa_patch
-            unzip -q Telegram_orig.ipa -d Telegram_extracted
-            APP_DIR=$(find Telegram_extracted/Payload -maxdepth 1 -name "*.app" | head -1)
-
-            # 1. Patch ONLY main app Info.plist (NOT framework Info.plists — they'd break)
-            INFOPLIST="$APP_DIR/Info.plist"
-            if [ -f "$INFOPLIST" ]; then
-              plutil -replace CFBundleIdentifier -string "$NEW_ID" "$INFOPLIST"
-              plutil -replace CFBundleDisplayName -string "Telegram★" "$INFOPLIST"
-              echo "Patched Info.plist: $OLD_ID → $NEW_ID"
-            fi
-
-            # 2. Patch embedded.mobileprovision (App Groups, keychain groups etc.)
-            PROV="$APP_DIR/embedded.mobileprovision"
-            if [ -f "$PROV" ]; then
-              sed -i '' "s/${OLD_ID}/${NEW_ID}/g" "$PROV" 2>/dev/null || true
-              echo "Patched embedded.mobileprovision"
-            fi
-
-            cd Telegram_extracted
-            zip -qr /tmp/ipa_patch/Telegram_patched.ipa Payload
-            cd $SOURCE_DIR
-            chmod 755 "$OUTPUT_PATH"
-            rm -f "$OUTPUT_PATH/Telegram.ipa"
-            cp /tmp/ipa_patch/Telegram_patched.ipa "$OUTPUT_PATH/Telegram.ipa"
-            echo "IPA patched successfully"
-          fi
+      - name: Set Build metadata
+        run: |
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          echo "BUILD_NUMBER=$COMMIT_COUNT" >> $GITHUB_ENV
 
       - name: Create Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          SOURCE_DIR=/Users/Shared/telegram-ios
-          cd $SOURCE_DIR
           TAG="build-${{ env.BUILD_NUMBER }}"
-          TITLE="Telegram ${{ env.APP_VERSION }} (${{ env.BUILD_NUMBER }})"
-          NOTES="An unsigned build of Telegram for iOS ${{ env.APP_VERSION }} (${{ env.BUILD_NUMBER }})"
+          TITLE="BetterTG (build ${{ env.BUILD_NUMBER }})"
+          NOTES="An unsigned build of BetterTG with fake Telegram Stars enabled."
 
-          # Delete existing release/tag if present (--clobber not supported on this runner)
+          # Delete existing release/tag if present to avoid conflicts
           gh release delete "$TAG" --yes 2>/dev/null || true
           git push origin --delete "$TAG" 2>/dev/null || true
 
           gh release create "$TAG" \
             --title "$TITLE" \
             --notes "$NOTES" \
-            "$SOURCE_DIR/build/artifacts/Telegram.ipa#Telegram.ipa" \
-            "$SOURCE_DIR/build/artifacts/Telegram.DSYMs.zip#Telegram.DSYMs.zip"
+            "build/Telegram.ipa#Telegram.ipa"

@@ -5,18 +5,24 @@ import TDLibKit
 
 extension Chat {
     static let moc = Chat(
+        accentColorId: 0,
         actionBar: nil,
-        availableReactions: .chatAvailableReactionsAll,
+        availableReactions: nil,
+        background: nil,
+        backgroundCustomEmojiId: 0,
+        blockList: nil,
+        businessBotManageBar: nil,
         canBeDeletedForAllUsers: false,
         canBeDeletedOnlyForSelf: false,
         canBeReported: false,
+        chatLists: [],
         clientData: "",
         defaultDisableNotification: false,
         draftMessage: nil,
+        emojiStatus: nil,
         hasProtectedContent: false,
         hasScheduledMessages: false,
         id: 0,
-        isBlocked: false,
         isMarkedAsUnread: false,
         isTranslatable: false,
         lastMessage: nil,
@@ -29,13 +35,18 @@ extension Chat {
         permissions: .moc,
         photo: nil,
         positions: [],
+        profileAccentColorId: 0,
+        profileBackgroundCustomEmojiId: 0,
         replyMarkupMessageId: 0,
-        themeName: "",
+        theme: nil,
         title: "titletitletitle",
         type: .chatTypePrivate(.init(userId: 0)),
         unreadCount: 0,
         unreadMentionCount: 0,
+        unreadPollVoteCount: 0,
         unreadReactionCount: 0,
-        videoChat: .init(defaultParticipantId: nil, groupCallId: 0, hasParticipants: false)
+        upgradedGiftColors: nil,
+        videoChat: .init(defaultParticipantId: nil, groupCallId: 0, hasParticipants: false),
+        viewAsTopics: false
     )
 }

@@ -5,14 +5,16 @@ import TDLibKit
 
 extension ChatPermissions {
     static let moc = ChatPermissions(
-        canAddWebPagePreviews: false,
+        canAddLinkPreviews: false,
         canChangeInfo: false,
+        canCreateTopics: false,
+        canEditTag: false,
         canInviteUsers: false,
-        canManageTopics: false,
         canPinMessages: false,
+        canReactToMessages: false,
         canSendAudios: false,
+        canSendBasicMessages: false,
         canSendDocuments: false,
-        canSendMessages: false,
         canSendOtherMessages: false,
         canSendPhotos: false,
         canSendPolls: false,

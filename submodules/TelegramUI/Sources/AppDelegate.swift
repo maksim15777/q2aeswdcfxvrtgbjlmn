@@ -325,6 +325,22 @@ private func extractAccountManagerState(records: AccountRecordsView<TelegramAcco
         precondition(!testIsLaunched)
         testIsLaunched = true
         
+        // --- Sideload crash reporter: show last crash reason as alert ---
+        NSSetUncaughtExceptionHandler { exception in
+            let info = "CRASH: \(exception.name.rawValue)\n\(exception.reason ?? "?")\n\(exception.callStackSymbols.prefix(8).joined(separator: "\n"))"
+            UserDefaults.standard.set(info, forKey: "sideload_last_crash")
+            UserDefaults.standard.synchronize()
+        }
+        if let lastCrash = UserDefaults.standard.string(forKey: "sideload_last_crash") {
+            UserDefaults.standard.removeObject(forKey: "sideload_last_crash")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                let alert = UIAlertController(title: "Last Crash Info", message: lastCrash, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true)
+            }
+        }
+        // --- End crash reporter ---
+        
         let _ = voipTokenPromise.get().start(next: { token in
             self.voipDeviceToken.set(.single(token))
         })

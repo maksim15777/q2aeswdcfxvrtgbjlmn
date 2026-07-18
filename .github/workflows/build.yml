@@ -31,6 +31,7 @@ jobs:
 
       - name: Build and Archive
         run: |
+          set -o pipefail
           xcodebuild archive \
             -project BetterTG.xcodeproj \
             -scheme "BetterTG Release" \
@@ -39,15 +40,28 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            PRODUCT_BUNDLE_IDENTIFIER="ph.telegra.TelegraphCopy"
+            PRODUCT_BUNDLE_IDENTIFIER="ph.telegra.TelegraphCopy" \
+            2>&1 | tee build_output.log
+          # Print any error lines for diagnosis
+          grep -E "error:|BUILD FAILED" build_output.log | tail -30 || true
 
       - name: Package IPA
         run: |
+          echo "--- Archive contents ---"
+          find build/BetterTG.xcarchive -name "*.app" -type d
+          APP_PATH=$(find build/BetterTG.xcarchive -name "*.app" -type d | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "ERROR: No .app bundle found in archive!"
+            ls -la build/BetterTG.xcarchive/Products/ || true
+            exit 1
+          fi
+          echo "Found app at: $APP_PATH"
           mkdir -p build/Payload
-          cp -R build/BetterTG.xcarchive/Products/Applications/BetterTG.app build/Payload/
+          cp -R "$APP_PATH" build/Payload/
           cd build
           zip -r Telegram.ipa Payload
           echo "IPA packaged successfully"
+
 
       - name: Set Build metadata
         run: |

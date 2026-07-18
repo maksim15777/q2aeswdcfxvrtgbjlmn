@@ -54,7 +54,7 @@ extension RootViewModel {
     
     func tdSearchPublicChats(query: String) async -> [Int64] {
         do {
-            return try await tdApi.searchPublicChats(query: query).chatIds
+            return try await tdApi.searchPublicChats(query: query, typeFilter: nil).chatIds
         } catch {
             log("Error searching publicChats (global): \(error)")
             return []

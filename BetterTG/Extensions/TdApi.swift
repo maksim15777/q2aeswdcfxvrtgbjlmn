@@ -40,9 +40,7 @@ extension TdApi {
                     databaseDirectory: dir,
                     databaseEncryptionKey: Data(),
                     deviceModel: Utils.modelName,
-                    enableStorageOptimizer: true,
                     filesDirectory: dir,
-                    ignoreFileNames: false,
                     systemLanguageCode: "en-US",
                     systemVersion: UIDevice.current.systemVersion,
                     useChatInfoDatabase: true,
@@ -137,12 +135,12 @@ extension TdApi {
                 nc.post(name: .chatIsTranslatable, object: updateChatIsTranslatable)
             case .updateChatHasScheduledMessages(let updateChatHasScheduledMessages):
                 nc.post(name: .chatHasScheduledMessages, object: updateChatHasScheduledMessages)
-            case .updateChatIsBlocked(let updateChatIsBlocked):
-                nc.post(name: .chatIsBlocked, object: updateChatIsBlocked)
+//            case .updateChatIsBlocked(let updateChatIsBlocked):
+//                nc.post(name: .chatIsBlocked, object: updateChatIsBlocked)
             case .updateChatIsMarkedAsUnread(let updateChatIsMarkedAsUnread):
                 nc.post(name: .chatIsMarkedAsUnread, object: updateChatIsMarkedAsUnread)
-            case .updateChatFilters(let updateChatFilters):
-                nc.post(name: .chatFilters, object: updateChatFilters)
+//            case .updateChatFilters(let updateChatFilters):
+//                nc.post(name: .chatFilters, object: updateChatFilters)
             case .updateChatOnlineMemberCount(let updateChatOnlineMemberCount):
                 nc.post(name: .chatOnlineMemberCount, object: updateChatOnlineMemberCount)
             case .updateForumTopicInfo(let updateForumTopicInfo):
@@ -309,6 +307,8 @@ extension TdApi {
                 nc.post(name: .closing)
             case .authorizationStateClosed:
                 nc.post(name: .closed)
+            @unknown default:
+                break
         }
     }
 }

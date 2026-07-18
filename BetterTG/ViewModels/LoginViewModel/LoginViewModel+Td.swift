@@ -15,7 +15,7 @@ extension LoginViewModel {
     
     func tdResendAuthenticationCode() async {
         do {
-            _ = try await tdApi.resendAuthenticationCode()
+            _ = try await tdApi.resendAuthenticationCode(reason: nil)
         } catch {
             log("Error resending authCode: \(error)")
         }

@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e
+
 mkdir -p BetterTG/Utilities/Generated
 cd BetterTG/Utilities/Templates
 find . -name "*.gyb" |
@@ -7,3 +10,4 @@ while read file; do
 done
 
 cd ../..
+

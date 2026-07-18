@@ -1070,10 +1070,14 @@ private func extractAccountManagerState(records: AccountRecordsView<TelegramAcco
             return true
         }
 
+        // VoIP PushKit registration is skipped for sideloaded builds:
+        // On iOS 13+, registering for .voIP without com.apple.developer.pushkit.unrestricted-voip
+        // causes iOS to immediately SIGKILL the app (free Apple ID accounts don't have this entitlement).
+        // Calls still work via regular notifications instead.
         let pushRegistry = PKPushRegistry(queue: .main)
-        if #available(iOS 9.0, *) {
-            pushRegistry.desiredPushTypes = Set([.voIP])
-        }
+        // if #available(iOS 9.0, *) {
+        //     pushRegistry.desiredPushTypes = Set([.voIP])
+        // }
         self.pushRegistry = pushRegistry
         pushRegistry.delegate = self
 

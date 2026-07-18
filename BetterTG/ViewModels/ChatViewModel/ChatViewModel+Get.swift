@@ -140,10 +140,10 @@ extension ChatViewModel {
                 }
             case .messageOriginHiddenUser(let messageOriginHiddenUser):
                 return messageOriginHiddenUser.senderName
-            case .messageOriginMessageImport(let messageOriginMessageImport):
-                return messageOriginMessageImport.senderName
             case .messageOriginUser(let messageOriginUser):
                 return await tdGetUser(id: messageOriginUser.senderUserId)?.firstName
+            @unknown default:
+                return nil
         }
     }
     

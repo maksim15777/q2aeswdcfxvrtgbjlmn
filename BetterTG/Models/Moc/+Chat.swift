@@ -7,7 +7,7 @@ extension Chat {
     static let moc = Chat(
         accentColorId: 0,
         actionBar: nil,
-        availableReactions: nil,
+        availableReactions: .chatAvailableReactionsAll(ChatAvailableReactionsAll(maxReactionCount: 11)),
         background: nil,
         backgroundCustomEmojiId: 0,
         blockList: nil,

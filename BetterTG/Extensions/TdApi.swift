@@ -307,6 +307,8 @@ extension TdApi {
                 nc.post(name: .closing)
             case .authorizationStateClosed:
                 nc.post(name: .closed)
+            case .authorizationStateWaitPremiumPurchase(_):
+                break
             @unknown default:
                 break
         }

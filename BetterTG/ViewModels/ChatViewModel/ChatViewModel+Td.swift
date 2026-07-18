@@ -126,7 +126,16 @@ extension ChatViewModel {
                 inputMessageContent: inputMessageContent,
                 options: nil,
                 replyMarkup: nil,
-                replyTo: replyMessage.map { .messageReplyToMessage(.init(chatId: 0, messageId: $0.message.id, quote: nil)) }
+                replyTo: replyMessage.map {
+                    TDLibKit.MessageReplyTo.messageReplyToMessage(
+                        TDLibKit.MessageReplyToMessage(
+                            chatId: 0,
+                            messageId: $0.message.id,
+                            quote: nil as TDLibKit.MessageReplyToMessageQuote?
+                        )
+                    )
+                },
+                topicId: nil as TDLibKit.MessageTopic?
             )
         } catch {
             await tdSendChatAction(.chatActionCancel)
@@ -141,7 +150,16 @@ extension ChatViewModel {
                 inputMessageContents: inputMessageContents,
                 onlyPreview: nil,
                 options: nil,
-                replyTo: replyMessage.map { .messageReplyToMessage(.init(chatId: 0, messageId: $0.message.id, quote: nil)) }
+                replyTo: replyMessage.map {
+                    TDLibKit.MessageReplyTo.messageReplyToMessage(
+                        TDLibKit.MessageReplyToMessage(
+                            chatId: 0,
+                            messageId: $0.message.id,
+                            quote: nil as TDLibKit.MessageReplyToMessageQuote?
+                        )
+                    )
+                },
+                topicId: nil as TDLibKit.MessageTopic?
             )
         } catch {
             await tdSendChatAction(.chatActionCancel)
@@ -169,7 +187,8 @@ extension ChatViewModel {
             _ = try await tdApi.viewMessages(
                 chatId: customChat.chat.id,
                 forceRead: true,
-                messageIds: ids
+                messageIds: ids,
+                source: nil as TDLibKit.MessageSource?
             )
         } catch {
 //            log("Error viewing messages: \(error)")
@@ -178,7 +197,12 @@ extension ChatViewModel {
     
     func tdSendChatAction(_ chatAction: ChatAction) async {
         do {
-            _ = try await tdApi.sendChatAction(action: chatAction, chatId: customChat.chat.id)
+            _ = try await tdApi.sendChatAction(
+                action: chatAction,
+                businessConnectionId: nil as String?,
+                chatId: customChat.chat.id,
+                topicId: nil as TDLibKit.MessageTopic?
+            )
         } catch {
             log("Error sending chatAction: \(error)")
         }

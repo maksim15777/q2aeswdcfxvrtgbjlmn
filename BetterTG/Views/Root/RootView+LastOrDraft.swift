@@ -16,16 +16,24 @@ extension RootView {
     }
     
     @ViewBuilder func draftMessageView(for draftMessage: DraftMessage) -> some View {
-        HStack(alignment: .bottom, spacing: 0) {
+        let isReply: Bool = {
+            if let replyTo = draftMessage.replyTo,
+               case .inputMessageReplyToMessage(let r) = replyTo {
+                return r.messageId != 0
+            }
+            return false
+        }()
+        
+        return HStack(alignment: .bottom, spacing: 0) {
             Text("Draft: ")
                 .foregroundColor(.red)
             
-            if draftMessage.replyToMessageId != 0 {
+            if isReply {
                 Text("reply ")
                     .foregroundColor(.white)
             }
             
-            switch draftMessage.inputMessageText {
+            switch draftMessage.content {
                 case .inputMessageText(let inputMessageText):
                     Text(inputMessageText.text.text)
                 default:

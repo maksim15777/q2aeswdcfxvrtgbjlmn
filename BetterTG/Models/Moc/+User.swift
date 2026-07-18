@@ -5,25 +5,32 @@ import TDLibKit
 
 extension User {
     static let moc = User(
+        accentColorId: 0,
+        activeStoryState: nil,
         addedToAttachmentMenu: false,
+        backgroundCustomEmojiId: 0,
         emojiStatus: nil,
         firstName: "firstName",
         haveAccess: false,
         id: 0,
+        isCloseFriend: false,
         isContact: false,
-        isFake: false,
         isMutualContact: false,
         isPremium: false,
-        isScam: false,
         isSupport: false,
-        isVerified: false,
         languageCode: "",
         lastName: "lastName",
+        paidMessageStarCount: 0,
         phoneNumber: "",
+        profileAccentColorId: 0,
+        profileBackgroundCustomEmojiId: 0,
         profilePhoto: nil,
-        restrictionReason: "",
+        restrictionInfo: nil,
+        restrictsNewChats: false,
         status: .userStatusEmpty,
         type: .userTypeRegular,
-        usernames: nil
+        upgradedGiftColors: nil,
+        usernames: nil,
+        verificationStatus: nil
     )
 }

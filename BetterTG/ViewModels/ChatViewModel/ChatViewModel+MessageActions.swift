@@ -51,7 +51,7 @@ extension ChatViewModel {
                 .inputMessageText(
                     .init(
                         clearDraft: true,
-                        disableWebPagePreview: true,
+                        linkPreviewOptions: nil,
                         text: FormattedText(
                             entities: [],
                             text: text.string
@@ -64,14 +64,17 @@ extension ChatViewModel {
     func sendMessageVoiceNote(duration: Int, waveform: Data) async {
         await tdSendMessage(with:
                 .inputMessageVoiceNote(
-                    .init(
+                    InputMessageVoiceNote(
                         caption: FormattedText(
                             entities: [],
                             text: text.string
                         ),
-                        duration: duration,
-                        voiceNote: .inputFileLocal(.init(path: savedVoiceNoteUrl.path())),
-                        waveform: waveform
+                        selfDestructType: nil,
+                        voiceNote: InputVoiceNote(
+                            duration: duration,
+                            voiceNote: .inputFileLocal(.init(path: savedVoiceNoteUrl.path())),
+                            waveform: waveform
+                        )
                     )
                 )
         )

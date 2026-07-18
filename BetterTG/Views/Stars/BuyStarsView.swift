@@ -151,14 +151,7 @@ struct BuyStarsView: View {
     }
 }
 
-extension NumberFormatter {
-    static let starsFormatter: NumberFormatter = {
-        let f = NumberFormatter()
-        f.numberStyle = .decimal
-        f.groupingSeparator = ","
-        return f
-    }()
-}
+
 
 #Preview {
     BuyStarsView()

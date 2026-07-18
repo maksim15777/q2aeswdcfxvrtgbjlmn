@@ -67,11 +67,8 @@ struct SettingsView: View {
                     Text("Change settings for the app here")
                 }
             } header: {
-                SpacingAround(axis: .horizontal) {
-                    Text("Settings")
-                        .padding()
-                }
-                .headerProminence(.increased)
+                Text("Settings")
+                    .font(.headline)
             }
             .listRowBackground(Color.clear)
             
@@ -99,7 +96,6 @@ struct SettingsView: View {
     
     @ViewBuilder func customSection<Content: View>(
         header: String? = nil,
-        increasedHeader: Bool = true,
         footer: String? = nil,
         @ViewBuilder _ content: () -> Content
     ) -> some View {
@@ -108,7 +104,6 @@ struct SettingsView: View {
         } header: {
             if let header {
                 Text(header)
-                    .headerProminence(increasedHeader ? .increased : .standard)
             }
         } footer: {
             if let footer {

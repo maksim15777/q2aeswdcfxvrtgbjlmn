@@ -41,9 +41,9 @@ struct RootView: View {
             if starsVM.showSuccessAnimation {
                 StarsPurchaseSuccessView(amount: starsVM.purchasedAmount)
                     .transition(.opacity)
-                    .zIndex(999)
             }
         }
+        .zIndex(999)
         .animation(.easeInOut(duration: 0.3), value: starsVM.showSuccessAnimation)
         .transition(.opacity)
         .animation(value: viewModel.loggedIn)

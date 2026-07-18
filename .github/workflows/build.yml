@@ -33,7 +33,7 @@ jobs:
         run: |
           xcodebuild archive \
             -project BetterTG.xcodeproj \
-            -scheme BetterTG \
+            -scheme "BetterTG Release" \
             -archivePath build/BetterTG.xcarchive \
             -sdk iphoneos \
             CODE_SIGNING_ALLOWED=NO \
